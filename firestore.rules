@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // -------------------------------------------------------------------------
+    // GLOBAL HELPERS
+    // -------------------------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      // Look up admin status from the user document
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // -------------------------------------------------------------------------
+    // COLLECTIONS
+    // -------------------------------------------------------------------------
+
+    // Users
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.isAdmin == false; // Prevent self-elevation
+      allow update: if isOwner(userId) && (
+        // Allow updating limits and settings but NOT isAdmin or isSuspended
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'isSuspended'])
+      ) || isAdmin();
+    }
+
+    // Mentors (Admin managed)
+    match /mentors/{mentorId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Chat History (Subcollection)
+    match /users/{userId}/chatHistory/{mentorId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+    
+    // Older structure support if applicable
+    match /users/{userId}/chats/{mentorId}/messages/{messageId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Debates
+    match /debates/{debateId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    // Blueprints
+    match /blueprints/{blueprintId} {
+      allow read, write: if isAdmin() || (isSignedIn() && (resource == null || resource.data.userId == request.auth.uid));
+    }
+
+    // Judgments
+    match /judgments/{judgmentId} {
+      allow read, write: if isAdmin() || (isSignedIn() && (resource == null || resource.data.userId == request.auth.uid));
+    }
+
+    // Voice Sessions
+    match /voiceSessions/{sessionId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Admin Configs
+    match /admin_configs/{configId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

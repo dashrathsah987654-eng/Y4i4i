@@ -1,0 +1,169 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Core identity and settings for a seeker within the archive.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "joinDate": { "type": "number" },
+        "isPremium": { "type": "boolean" },
+        "isSuspended": { "type": "boolean" },
+        "isAdmin": { "type": "boolean" },
+        "userAura": { "type": "string" },
+        "userName": { "type": "string" },
+        "conversationStyle": { "type": "string" },
+        "mentorMemoryEnabled": { "type": "boolean" },
+        "adaptiveIntelligenceEnabled": { "type": "boolean" },
+        "ambientSound": { "type": "string" },
+        "ambientVolume": { "type": "number" },
+        "lastResetDate": { "type": "number" },
+        "lastWeeklyResetDate": { "type": "number" },
+        "questionsAskedToday": { "type": "number" },
+        "realityChecksToday": { "type": "number" },
+        "debatesStartedToday": { "type": "number" },
+        "blueprintsGeneratedToday": { "type": "number" },
+        "voiceDurationUsedToday": { "type": "number" },
+        "judgmentsStartedThisWeek": { "type": "number" }
+      },
+      "required": ["uid", "email", "joinDate"]
+    },
+    "Mentor": {
+      "title": "Mentor Profile",
+      "description": "Definition of a historical intelligence in the archive.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "imageFallback": { "type": "string" },
+        "description": { "type": "string" },
+        "systemPrompt": { "type": "string" },
+        "theme": { "type": "string" },
+        "voice": { "type": "string" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["id", "name"]
+    },
+    "Message": {
+      "title": "Chat Message",
+      "description": "A single exchange in a mentor dialogue.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "mentor"] },
+        "content": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "role", "content", "timestamp"]
+    },
+    "Debate": {
+      "title": "Debate Session",
+      "description": "A historical clash of perspectives.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "topic": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "messages": { "type": "array", "items": { "$ref": "DebateMessage" } },
+        "summary": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "userId", "topic", "timestamp"]
+    },
+    "DebateMessage": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "mentorId": { "type": "string" },
+        "content": { "type": "string" }
+      }
+    },
+    "Blueprint": {
+      "title": "Strategy Blueprint",
+      "description": "A generated roadmap for personal transformation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "goal": { "type": "string" },
+        "timeframe": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "content": { "type": "object" },
+        "status": { "type": "string", "enum": ["generating", "active", "completed"] },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "userId", "goal", "timestamp"]
+    },
+    "JudgmentSession": {
+      "title": "Judgment Session",
+      "description": "A subjects logic put to the tribunal.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "decision": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "interrogations": { "type": "array" },
+        "userDefense": { "type": "string" },
+        "verdicts": { "type": "array" },
+        "consensus": { "type": "string" },
+        "status": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "userId", "decision", "timestamp"]
+    },
+    "VoiceSession": {
+      "title": "Voice Archetype Log",
+      "description": "Recorded verbal trace of enlightenment.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "mentorId": { "type": "string" },
+        "transcript": { "type": "array" },
+        "duration": { "type": "number" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["id", "userId", "mentorId", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and limits."
+    },
+    "/mentors/{mentorId}": {
+      "schema": "Mentor",
+      "description": "Global mentor catalog managed by admins."
+    },
+    "/users/{userId}/chatHistory/{mentorId}": {
+      "schema": "object",
+      "description": "Mentor-specific chat history for a user."
+    },
+    "/debates/{debateId}": {
+      "schema": "Debate",
+      "description": "Inter-mentor debates."
+    },
+    "/blueprints/{blueprintId}": {
+      "schema": "Blueprint",
+      "description": "User growth blueprints."
+    },
+    "/judgments/{judgmentId}": {
+      "schema": "JudgmentSession",
+      "description": "Tribunal judgments."
+    },
+    "/voiceSessions/{sessionId}": {
+      "schema": "VoiceSession",
+      "description": "Audio logs."
+    },
+    "/admin_configs/global": {
+      "schema": "object",
+      "description": "Global feature toggles and content updates."
+    }
+  }
+}

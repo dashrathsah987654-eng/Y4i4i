@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-serif: "Crimson Pro", serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-primary-gold: #C9A84C;
+  --color-secondary-gold: #E5D29A;
+  --color-premium-card: #0A0A0A;
+  --color-premium-black: #050505;
+}
+
+@layer base {
+  body {
+    @apply bg-black text-white font-sans antialiased overscroll-none selection:bg-primary-gold/30;
+  }
+}
+
+@layer utilities {
+  .gold-glow {
+    box-shadow: 0 0 20px rgba(201, 168, 76, 0.15);
+  }
+  
+  .gold-glow-strong {
+    box-shadow: 0 0 40px rgba(201, 168, 76, 0.25);
+  }
+
+  .premium-gradient {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.1) 0%, transparent 100%);
+  }
+
+  .glass-premium {
+    @apply bg-white/5 backdrop-blur-3xl border border-white/5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)];
+  }
+  
+  .cinematic-glow {
+    @apply shadow-[0_0_80px_rgba(201,168,76,0.15)];
+  }
+
+  .text-glow-gold {
+     text-shadow: 0 0 10px rgba(201, 168, 76, 0.5);
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 4s ease-in-out infinite;
+}
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+}
+.page-enter-active {
+  opacity: 1;
+  transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.page-exit {
+  opacity: 1;
+}
+.page-exit-active {
+  opacity: 0;
+  transition: opacity 400ms ease-in;
+}
